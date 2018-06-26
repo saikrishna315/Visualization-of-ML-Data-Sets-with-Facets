@@ -15,15 +15,32 @@
  * limitations under the License.
  */
 
-import {FacetsDiveLegend} from './facets-dive-legend';
+import {FacetsDiveVis} from './facets-dive-vis';
 
 const {expect} = chai;
 
-describe('FacetsDiveLegend', () => {
+describe('FacetsDiveVis', () => {
 
   it('should appear in the test page', () => {
-    const elem = document.querySelector('facets-dive-legend');
+    const elem = document.querySelector('facets-dive-vis');
     expect(elem instanceof Element).to.be.true;
+  });
+
+  it('should update stats when data is set', () => {
+    const vis = document.querySelector('facets-dive-vis') as FacetsDiveVis;
+
+    vis.data = [{
+      'name': 'apple',
+      'answer': 42,
+    }];
+
+    expect(vis.stats).to.have.all.keys('name', 'answer');
+    expect(vis.stats.name.totalCount).to.equal(1);
+    expect(vis.stats.name.numberCount).to.equal(0);
+    expect(vis.stats.name.stringCount).to.equal(1);
+    expect(vis.stats.answer.totalCount).to.equal(1);
+    expect(vis.stats.answer.numberCount).to.equal(1);
+    expect(vis.stats.answer.stringCount).to.equal(0);
   });
 
 });

@@ -6,39 +6,54 @@ load("@org_tensorflow_tensorboard//tensorboard/defs:vulcanize.bzl", "tensorboard
 licenses(["notice"])  # Apache 2.0
 
 tf_web_library(
-    name = "visualizations",
+    name = "facets_dive",
     srcs = [
-        "visualizations.html",
+        "facets-dive.html",
+        "facets-dive.ts",
     ],
-    path = "/facets",
+    path = "/facets-dive/components/facets-dive",
     deps = [
-        "//facets_overview/components/facets_overview",
-        "//facets_dive/components/facets_dive",
+        "//facets_dive/components/facets_dive_controls",
+        "//facets_dive/components/facets_dive_info_card",
+        "//facets_dive/components/facets_dive_legend",
+        "//facets_dive/components/facets_dive_vis",
+        "//facets_dive/lib:stats",
+        "@org_polymer_iron_icons",
+        "@org_polymer_paper_button",
+        "@org_tensorflow_tensorboard//tensorboard/components/tf_imports:polymer",
     ],
 )
 
-# Compiles standalone HTML for Facets Dive demo, used by ":facets_jupyter"
+tf_web_library(
+    name = "test",
+    testonly = True,
+    srcs = [
+        "test.html",
+        "test.ts",
+    ],
+    path = "/facets-dive/components/facets-dive",
+    deps = [
+        ":facets_dive",
+        "//facets_dive/lib/test:externs",
+        "@org_tensorflow_tensorboard//tensorboard/components/tf_imports:web_component_tester",
+    ],
+)
+
+# Compiles standalone HTML file that tests facets-dive web component.
 #
+#   $ bazel run //facets_dive/components/facets_dive:devserver
+#   $ google-chrome http://localhost:6006/facets-dive/components/facets-dive/runner.html
+#
+# NOTE: Test output is logged to Chrome's Ctrl+Shift+J console.
 # NOTE: This runs TensorBoard Vulcanize.java to inline HTML imports and
 #       runs the Closure Compiler on the JavaScript outputted by the
 #       TypeScript Compiler, in order to remove ES6 imports, which don't
 #       work in web browsers. Otherwise we'd `bazel run` tf_web_library.
 tensorboard_html_binary(
-    name = "facets",
-    compile = True,
-    input_path = "/facets/visualizations.html",
-    output_path = "/all/visualizations.html",
-    deps = [":visualizations"],
-)
-
-# Add javascript to undefine the define function when building the vulcanized
-# visualizations. This is to avoid issues with require.js dependency loading
-# when using the visualizations inside of a Jupyter notebook.
-# TODO(jwexler): Figure out a cleaner way to get vulcanized visualizations that
-# work in Jupyter notebooks.
-genrule(
-    name = "facets_jupyter",
-    srcs = [":facets"],
-    outs = ["facets-jupyter.html"],
-    cmd = "sed 's|<!doctype html>|<!doctype html><script>define=undefined</script>|' $(location :facets) > $@"
+    name = "devserver",
+    testonly = True,  # Keeps JavaScript somewhat readable
+    compile = True,  # Run Closure Compiler
+    input_path = "/facets-dive/components/facets-dive/test.html",
+    output_path = "/facets-dive/components/facets-dive/runner.html",
+    deps = [":test"],
 )

@@ -15,15 +15,27 @@
  * limitations under the License.
  */
 
-import {FacetsDiveControls} from './facets-dive-controls';
+import {FacetsDiveInfoCard} from './facets-dive-info-card';
 
 const {expect} = chai;
 
-describe('FacetsDiveControls', () => {
+describe('FacetsDiveInfoCard', () => {
 
   it('should appear in the test page', () => {
-    const elem = document.querySelector('facets-dive-controls');
+    const elem = document.querySelector('facets-dive-info-card');
     expect(elem instanceof Element).to.be.true;
+  });
+
+  it('should show selected data objects', (done) => {
+    const elem =
+        document.querySelector('facets-dive-info-card') as FacetsDiveInfoCard;
+
+    const data = [{'exampleKey': 'exampleValue'}];
+    elem.selectedData = data;
+
+    expect(elem.textContent)
+        .to.match(/exampleKey/)
+        .and.to.match(/exampleValue/);
   });
 
 });
